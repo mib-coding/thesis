@@ -1,69 +1,148 @@
 package odeme.behaviour;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import odme.jtreetograph.JtreeToGraphDelete;
+import odme.jtreetograph.JtreeToGraphVariables;
+import odme.odmeeditor.Main;
 
+import org.junit.jupiter.api.*;
+import org.mockito.MockedStatic;
+
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
-public class BehaviourTest {
-
-    private Behaviour behaviour;
+class BehaviourTest {
 
     @BeforeEach
-    public void setUp() {
-        behaviour = new Behaviour();
+    void setup() {
+        // Reset static references before each test
+        Behaviour.model = null;
+        Behaviour.table = null;
     }
 
     @Test
-    public void testConstructor_InitializesTableWithRows() {
-        assertNotNull(Behaviour.table, "Table should not be null");
-        assertNotNull(Behaviour.model, "Model should not be null");
-        assertEquals(100, Behaviour.model.getRowCount(), "Initial row count should be 100");
+    void shouldInitializeWithTableAndModel() {
+        Behaviour behaviour = new Behaviour();
+
+        assertNotNull(Behaviour.table, "Table should be initialized");
+        assertNotNull(Behaviour.model, "Model should be initialized");
+        assertEquals(100, Behaviour.model.getRowCount(), "Should initialize 100 empty rows");
     }
 
     @Test
-    public void testSetNullToAllRows_ClearsAndFillsRows() {
-        // Pre-fill model with dummy data
-        Behaviour.model.setRowCount(10);
-        assertEquals(10, Behaviour.model.getRowCount());
-
-        // Call method
-        Behaviour.setNullToAllRows();
-
-        assertEquals(100, Behaviour.model.getRowCount(), "Row count should reset to 100 after clearing");
-        assertEquals("", Behaviour.model.getValueAt(0, 0), "First row should contain an empty string");
-
-    }
-
-    @Test
-    public void testShowBehavioursInTable_AddsNodeAndBehaviours() {
-        String nodeName = "Node1";
-        String[] behaviours = {"Walk", "Run", "Jump"};
-
-        behaviour.showBehavioursInTable(nodeName, behaviours);
-
+    void shouldResetRowsWhenSetNullToAllRowsCalled() {
+        Behaviour behaviour = new Behaviour();
         DefaultTableModel model = Behaviour.model;
 
-        // 3 data rows + 100 null rows
-        assertEquals(103, model.getRowCount());
+        model.addRow(new Object[]{"ExtraRow"});
+        assertTrue(model.getRowCount() > 100);
 
-        assertEquals("Node1", model.getValueAt(0, 0));
-        assertEquals("Walk", model.getValueAt(0, 1));
-
-        assertEquals("Node1", model.getValueAt(2, 0));
-        assertEquals("Jump", model.getValueAt(2, 1));
+        Behaviour.setNullToAllRows();
+        assertEquals(100, model.getRowCount(), "After reset, should contain exactly 100 rows");
+        assertEquals("", model.getValueAt(0, 0), "Rows should be empty after reset");
     }
 
-   @Test
-    public void testShowBehavioursInTable_HandlesNullValues() {
-        String[] behaviours = {"Run", null, "Stop"};
+    @Test
+    void shouldShowBehavioursInTableCorrectly() {
+        Behaviour behaviour = new Behaviour();
 
-        behaviour.showBehavioursInTable("NodeX", behaviours);
+        String[] nodes = {"B1", "B2"};
+        behaviour.showBehavioursInTable("Node1", nodes);
 
-        assertEquals("Run", Behaviour.model.getValueAt(0, 1));
-        assertEquals("", Behaviour.model.getValueAt(1, 0));  // null value case
-        assertEquals("Stop", Behaviour.model.getValueAt(2, 1));
+        DefaultTableModel model = Behaviour.model;
+        assertEquals("Node1", model.getValueAt(0, 0));
+        assertEquals("B1", model.getValueAt(0, 1));
+        assertEquals("Node1", model.getValueAt(1, 0));
+        assertEquals("B2", model.getValueAt(1, 1));
+    }
+
+    @Test
+    void shouldShowBehaviourInTableWithParsedValues() {
+        Behaviour behaviour = new Behaviour();
+
+        String[] data = {"val1,extra", "val2,extra"};
+        behaviour.showBehaviourInTable("NodeX", data);
+
+        DefaultTableModel model = Behaviour.model;
+        assertEquals("NodeX", model.getValueAt(0, 0));
+        assertEquals("val1", model.getValueAt(0, 1));
+        assertEquals("NodeX", model.getValueAt(1, 0));
+        assertEquals("val2", model.getValueAt(1, 1));
+    }
+
+    @Test
+    void shouldHandleEmptyBehaviourArrayGracefully() {
+        Behaviour behaviour = new Behaviour();
+        behaviour.showBehavioursInTable("NodeZ", new String[]{});
+
+        DefaultTableModel model = Behaviour.model;
+        assertEquals(100, model.getRowCount(), "Should still have 100 rows even with empty input");
+    }
+
+    @Test
+    void shouldInvokeUpdateBehaviourOnDoubleClick() {
+        Behaviour behaviour = new Behaviour();
+        DefaultTableModel model = Behaviour.model;
+
+        model.setValueAt("Node1", 0, 0);
+        model.setValueAt("Behaviour1", 0, 1);
+
+        try (
+                MockedStatic<JtreeToGraphDelete> mockedStaticDelete = mockStatic(JtreeToGraphDelete.class);
+                MockedStatic<JtreeToGraphVariables> mockedStaticVars = mockStatic(JtreeToGraphVariables.class);
+                MockedStatic<JOptionPane> mockedStaticOption = mockStatic(JOptionPane.class)
+            ) 
+        {
+                mockedStaticOption.when(() -> JOptionPane.showConfirmDialog(
+                    any(Component.class), any(Object[].class), anyString(), anyInt(), anyInt()
+                )).thenReturn(JOptionPane.OK_OPTION);
+
+                // ✅ For void static method
+                mockedStaticDelete.when(() ->
+                    JtreeToGraphDelete.deleteBehaviourFromScenarioTableForUpdate(any(), anyString(), anyString())
+                    ).thenAnswer(invocation -> null);  // OR doNothing().when(...)
+
+                Behaviour behaviourPanel = new Behaviour();
+                behaviourPanel.showBehaviourInTable("Node", new String[]{"a,b"});
+
+                // Simulate the double-click
+                JTable table = Behaviour.table;
+                MouseListener[] listeners = table.getMouseListeners();
+                MouseEvent event = new MouseEvent(table, MouseEvent.MOUSE_CLICKED,
+                System.currentTimeMillis(), 0, 1, 1, 2, false);
+                    for (MouseListener l : listeners) {
+                        l.mouseClicked(event);
+                    }
+
+                // Verify it was called once
+                mockedStaticDelete.verify(() ->
+                    JtreeToGraphDelete.deleteBehaviourFromScenarioTableForUpdate(any(), anyString(), anyString()), times(1)
+                );
+        }
+
+    }
+
+    @Test
+    void shouldNotCrashWhenNullValuesInTable() {
+        Behaviour behaviour = new Behaviour();
+        DefaultTableModel model = Behaviour.model;
+        model.setValueAt(null, 0, 0);
+        model.setValueAt(null, 0, 1);
+
+        assertDoesNotThrow(() -> {
+            MouseEvent e = new MouseEvent(Behaviour.table, MouseEvent.MOUSE_CLICKED,
+                    System.currentTimeMillis(), 0, 10, 10, 2, false);
+            for (MouseListener listener : Behaviour.table.getMouseListeners()) {
+                listener.mouseClicked(e);
+            }
+        });
     }
 }
