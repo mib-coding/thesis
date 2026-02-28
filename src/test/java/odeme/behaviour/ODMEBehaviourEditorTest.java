@@ -9,7 +9,7 @@ import java.awt.*;
 import javax.swing.undo.UndoManager;
 
 /**
- * ✅ Final stable tests for {@link ODMEBehaviourEditor}.
+ *  Final stable tests for {@link ODMEBehaviourEditor}.
  * These handle real class behavior without modifying production code.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -50,7 +50,7 @@ public class ODMEBehaviourEditorTest {
         assertNotNull(split.getLeftComponent(), "Left (treePanel) must not be null");
         assertNotNull(split.getRightComponent(), "Right (graphWindow) must not be null");
 
-        // ✅ Just verify dividerLocation can be accessed without exception
+        // Just verify dividerLocation can be accessed without exception
         assertDoesNotThrow(() -> split.getDividerLocation());
     }
 
@@ -66,7 +66,7 @@ public class ODMEBehaviourEditorTest {
         assertFalse(ODMEBehaviourEditor.undoControlForSubTree, "undoControlForSubTree should default to false");
         assertEquals("", ODMEBehaviourEditor.nodeAddDecorator, "nodeAddDecorator should be empty string");
 
-        // ✅ Accept 'root' since BehaviourToTree sets it internally
+        // Accept 'root' since BehaviourToTree sets it internally
         assertTrue(
                 ODMEBehaviourEditor.nodeBehaviour.equals("") || ODMEBehaviourEditor.nodeBehaviour.equals("root"),
                 "nodeBehaviour should be empty or initialized to 'root'"

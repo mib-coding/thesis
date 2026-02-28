@@ -45,16 +45,15 @@ class XmlJTreeTest {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) xmlJTree.dtModel.getRoot();
         assertEquals("root", root.getUserObject());
 
-        // Current code will add only nodes that themselves have children:
-        // So root should have one child: level1
+        
         assertEquals(1, root.getChildCount(), "Root should have one child (level1)");
         DefaultMutableTreeNode level1 = (DefaultMutableTreeNode) root.getFirstChild();
 
-        // level1 has one child (level2) since level2 has a leaf inside
+        
         assertEquals("level1", level1.getUserObject());
         assertEquals(1, level1.getChildCount());
 
-        // level2 will have no child (leaf not added)
+        
         DefaultMutableTreeNode level2 = (DefaultMutableTreeNode) level1.getFirstChild();
         assertEquals("level2", level2.getUserObject());
         assertEquals(0, level2.getChildCount(), "Leaf not added since it has no children");

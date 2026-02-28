@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 
 /**
- * ✅ Tests for {@link MainWindow}.
+ *  Tests for {@link MainWindow}.
  * Verifies that the frame, toolbar, and menu bar are initialized correctly.
  */
 class MainWindowTest {

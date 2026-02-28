@@ -17,7 +17,7 @@ class PanelSplitorTest {
     @BeforeEach
     void setUp() {
         panelSplitor = new PanelSplitor();
-        //PanelSplitor.dividerLocation = 0; // ✅ reset before each test
+        //PanelSplitor.dividerLocation = 0; //  reset before each test
     }
 
     @AfterEach
@@ -57,7 +57,7 @@ class PanelSplitorTest {
     @Test
     @DisplayName("PS_02 | addSplitor should return valid split pane combining panels")
     void testAddSplitorCreatesValidPane() {
-        // ✅ Use real lightweight components, not mocks
+        //  Use real lightweight components, not mocks
         ProjectTree projectTree = new ProjectTree();
         GraphWindow graphWindow = new GraphWindow();
 

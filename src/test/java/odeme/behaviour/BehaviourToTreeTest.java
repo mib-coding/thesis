@@ -88,7 +88,7 @@ class BehaviourToTreeTest {
 
         MouseEvent mockEvent = mock(MouseEvent.class);
         when(mockEvent.getPoint()).thenReturn(new java.awt.Point(1, 1));
-        // ✅ Use real integers instead of anyInt()
+        //  Use real integers instead of anyInt()
         when(btt.tree.getPathForLocation(1, 1)).thenReturn(path);
 
         try (MockedStatic<odeme.behaviour.ODMEBehaviourEditor> mocked = mockStatic(odeme.behaviour.ODMEBehaviourEditor.class)) 

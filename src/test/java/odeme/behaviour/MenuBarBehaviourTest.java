@@ -14,7 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * ✅ Tests for {@link MenuBarBehaviour}.
+ *  Tests for {@link MenuBarBehaviour}.
  * Verifies correct menu bar creation and setup behavior.
  */
 class MenuBarBehaviourTest {

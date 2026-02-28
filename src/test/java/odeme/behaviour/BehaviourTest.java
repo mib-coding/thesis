@@ -105,7 +105,7 @@ class BehaviourTest {
                     any(Component.class), any(Object[].class), anyString(), anyInt(), anyInt()
                 )).thenReturn(JOptionPane.OK_OPTION);
 
-                // ✅ For void static method
+                // For void static method
                 mockedStaticDelete.when(() ->
                     JtreeToGraphDelete.deleteBehaviourFromScenarioTableForUpdate(any(), anyString(), anyString())
                     ).thenAnswer(invocation -> null);  // OR doNothing().when(...)
